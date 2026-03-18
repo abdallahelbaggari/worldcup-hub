@@ -1,0 +1,50 @@
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #f4f6f9;
+}
+
+.app {
+  max-width: 500px;
+  margin: auto;
+  padding: 15px;
+}
+
+header {
+  text-align: center;
+  background: #006400;
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+
+.btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: none;
+  background: #006400;
+  color: white;
+  border-radius: 6px;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+}
+
+ul {
+  padding-left: 20px;
+}
