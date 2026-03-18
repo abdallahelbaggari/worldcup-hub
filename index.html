@@ -1,1 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WorldCup Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="WorldCup Hub - Fan platform for global football">
+  <link rel="stylesheet" href="style.css">
+</head>
 
+<body>
+
+<div class="app">
+
+  <header>
+    <h1>⚽ WorldCup Hub</h1>
+    <p>Fan Platform for Global Football</p>
+  </header>
+
+  <button id="loginBtn" class="btn">🔐 Continue with Pi</button>
+
+  <div id="dashboard" style="display:none;">
+
+    <div class="top-bar">
+      <h2>Welcome, <span id="username"></span></h2>
+      <button id="logoutBtn" class="btn">Logout</button>
+    </div>
+
+    <div class="card">
+      <h3>📅 Match Schedule</h3>
+      <ul id="matches"></ul>
+    </div>
+
+    <div class="card">
+      <h3>🧠 Prediction</h3>
+      <button class="btn" onclick="predict('Argentina')">Argentina</button>
+      <button class="btn" onclick="predict('Brazil')">Brazil</button>
+      <p id="result"></p>
+    </div>
+
+    <div class="card">
+      <h3>🏆 Leaderboard</h3>
+      <ul id="leaderboard">
+        <li>You - 0 pts</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>💬 Comments</h3>
+      <textarea id="commentInput"></textarea>
+      <button class="btn" onclick="addComment()">Post</button>
+      <ul id="comments"></ul>
+    </div>
+
+    <div class="card">
+      <h3>💰 Premium</h3>
+      <button id="premiumBtn" class="btn">Unlock Premium</button>
+    </div>
+
+  </div>
+
+  <p id="status">Open in Pi Browser</p>
+
+  <footer>
+    <p style="font-size:12px; text-align:center;">
+      Independent fan platform. Not affiliated with FIFA.
+    </p>
+  </footer>
+
+</div>
+
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
