@@ -1,0 +1,12 @@
+{
+  "name": "worldcup-hub",
+  "version": "1.0.0",
+  "description": "Fan platform for global football with Pi payments",
+  "main": "index.js",
+  "scripts": {
+    "start": "netlify dev"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
