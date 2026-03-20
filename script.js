@@ -1,6 +1,7 @@
-// REMOVE sandbox (IMPORTANT)
-Pi.init({ version: "2.0" });
+// ✅ ENABLE SANDBOX (VERY IMPORTANT)
+Pi.init({ version: "2.0", sandbox: true });
 
+// Backend path
 const backendURL = "/.netlify/functions";
 
 const loginBtn = document.getElementById("loginBtn");
@@ -17,6 +18,7 @@ const matches = [
   "Nigeria vs Ghana - March 22"
 ];
 
+// LOAD MATCHES
 const matchList = document.getElementById("matches");
 matches.forEach(m => {
   const li = document.createElement("li");
@@ -24,10 +26,10 @@ matches.forEach(m => {
   matchList.appendChild(li);
 });
 
-// LOGIN (Pi Authentication)
+// LOGIN (WITH PAYMENTS PERMISSION)
 loginBtn.addEventListener("click", async () => {
   try {
-    const scopes = ["username"];
+    const scopes = ["username", "payments"]; // ✅ FIXED
     const auth = await Pi.authenticate(scopes);
 
     username.innerText = auth.user.username;
@@ -68,28 +70,29 @@ function addComment() {
   input.value = "";
 }
 
-// PAYMENT (CONNECTED TO NETLIFY BACKEND)
+// ✅ PAYMENT (FULLY FIXED)
 document.getElementById("premiumBtn").addEventListener("click", () => {
 
   Pi.createPayment(
     {
       amount: 0.5,
-      memo: "Premium Access"
+      memo: "Premium Access",
+      metadata: { type: "premium" }
     },
     {
       onReadyForServerApproval: paymentId => {
-        fetch(`${backendURL}/approve`, {
+        fetch(`${backendURL}/approve`, {   // ✅ FIXED syntax
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ paymentId })
         });
       },
 
-      onReadyForServerCompletion: paymentId => {
+      onReadyForServerCompletion: (paymentId, txid) => {  // ✅ FIXED
         fetch(`${backendURL}/complete`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ paymentId })
+          body: JSON.stringify({ paymentId, txid })
         });
 
         alert("Premium unlocked!");
