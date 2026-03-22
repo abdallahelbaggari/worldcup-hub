@@ -1,7 +1,7 @@
 // ✅ Initialize Pi SDK
 Pi.init({ version: "2.0", sandbox: true });
 
-// ---------------------- ELEMENTS ----------------------
+// ---------------- ELEMENTS ----------------
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const premiumBtn = document.getElementById("premiumBtn");
@@ -11,15 +11,67 @@ const usernameDisplay = document.getElementById("username");
 
 const txList = document.getElementById("txList");
 const clearTxBtn = document.getElementById("clearTxBtn");
+const languageSwitcher = document.getElementById("languageSwitcher");
 
-// ---------------------- STATE ----------------------
+const adBox = document.getElementById("adBox");
+
+// ---------------- STATE ----------------
 let points = 0;
+let lastAction = 0;
+
 let transactions = JSON.parse(localStorage.getItem("txHistory")) || [];
+let leaderboardData = JSON.parse(localStorage.getItem("leaderboard")) || [];
 
-// ---------------------- TRANSACTION SYSTEM ----------------------
+// ---------------- LANGUAGE ----------------
+const translations = {
+  en: { login: "Login with Pi", logout: "Logout" },
+  ar: { login: "تسجيل الدخول", logout: "تسجيل الخروج" },
+  fr: { login: "Se connecter", logout: "Se déconnecter" }
+};
+
+let currentLang = localStorage.getItem("lang") || "en";
+
+function applyLanguage(lang) {
+  const t = translations[lang];
+
+  loginBtn.innerText = "🔐 " + t.login;
+  logoutBtn.innerText = t.logout;
+
+  document.body.style.direction = lang === "ar" ? "rtl" : "ltr";
+
+  localStorage.setItem("lang", lang);
+}
+
+applyLanguage(currentLang);
+
+languageSwitcher.addEventListener("change", (e) => {
+  currentLang = e.target.value;
+  applyLanguage(currentLang);
+});
+
+// ---------------- ADS ----------------
+const ads = [
+  "🔥 Discover new Pi apps",
+  "🚀 Grow your Pi earnings",
+  "💰 Promote your business with Pi"
+];
+
+function loadAd() {
+  const random = ads[Math.floor(Math.random() * ads.length)];
+  adBox.innerText = random;
+}
+loadAd();
+
+// ---------------- ANTI SPAM ----------------
+function canAct() {
+  const now = Date.now();
+  if (now - lastAction < 1500) return false;
+  lastAction = now;
+  return true;
+}
+
+// ---------------- TRANSACTIONS ----------------
 function renderTransactions() {
-  if (!txList) return;
-
   txList.innerHTML = "";
 
   if (transactions.length === 0) {
@@ -42,20 +94,15 @@ function addTransaction(text) {
   renderTransactions();
 }
 
-// Clear history
-if (clearTxBtn) {
-  clearTxBtn.addEventListener("click", () => {
-    transactions = [];
-    localStorage.removeItem("txHistory");
-    renderTransactions();
-    statusBox.innerText = "Transaction history cleared";
-  });
-}
+clearTxBtn.addEventListener("click", () => {
+  transactions = [];
+  localStorage.removeItem("txHistory");
+  renderTransactions();
+});
 
-// Initial render
 renderTransactions();
 
-// ---------------------- MATCHES ----------------------
+// ---------------- MATCHES ----------------
 const matches = [
   "Argentina vs Brazil - March 20",
   "France vs Germany - March 21",
@@ -63,16 +110,13 @@ const matches = [
 ];
 
 const matchList = document.getElementById("matches");
+matches.forEach(m => {
+  const li = document.createElement("li");
+  li.innerText = m;
+  matchList.appendChild(li);
+});
 
-if (matchList) {
-  matches.forEach(m => {
-    const li = document.createElement("li");
-    li.innerText = m;
-    matchList.appendChild(li);
-  });
-}
-
-// ---------------------- LOGIN ----------------------
+// ---------------- LOGIN ----------------
 loginBtn.addEventListener("click", async () => {
   try {
     statusBox.innerText = "Opening Pi authentication...";
@@ -88,32 +132,59 @@ loginBtn.addEventListener("click", async () => {
 
   } catch (err) {
     statusBox.innerText = "Authentication failed";
-    console.error(err);
   }
 });
 
-// ---------------------- LOGOUT ----------------------
+// ---------------- LOGOUT ----------------
 logoutBtn.addEventListener("click", () => {
   dashboard.style.display = "none";
   loginBtn.style.display = "block";
-
   statusBox.innerText = "Logged out";
 });
 
-// ---------------------- PREDICTION ----------------------
+// ---------------- LEADERBOARD ----------------
+function updateLeaderboard() {
+  const user = usernameDisplay.innerText;
+
+  const existing = leaderboardData.find(u => u.name === user);
+
+  if (existing) {
+    existing.points = points;
+  } else {
+    leaderboardData.push({ name: user, points });
+  }
+
+  leaderboardData.sort((a, b) => b.points - a.points);
+
+  localStorage.setItem("leaderboard", JSON.stringify(leaderboardData));
+
+  const list = document.getElementById("leaderboard");
+  list.innerHTML = "";
+
+  leaderboardData.slice(0, 5).forEach(u => {
+    const li = document.createElement("li");
+    li.innerText = `${u.name} - ${u.points} pts`;
+    list.appendChild(li);
+  });
+}
+
+// ---------------- PREDICTION ----------------
 function predict(team) {
+  if (!canAct()) return;
+
   document.getElementById("result").innerText = `You chose: ${team}`;
 
   points += 5;
 
-  document.getElementById("leaderboard").innerHTML =
-    `<li>You - ${points} pts</li>`;
+  updateLeaderboard();
 
   addTransaction(`🎯 Prediction: ${team}`);
 }
 
-// ---------------------- STAKING ----------------------
+// ---------------- STAKING ----------------
 document.getElementById("stakeBtn").addEventListener("click", () => {
+  if (!canAct()) return;
+
   const stake = parseInt(document.getElementById("stakeAmount").value);
 
   if (!stake || stake <= 0) return alert("Enter valid points");
@@ -123,8 +194,7 @@ document.getElementById("stakeBtn").addEventListener("click", () => {
 
   points = points - stake + reward;
 
-  document.getElementById("leaderboard").innerHTML =
-    `<li>You - ${points} pts</li>`;
+  updateLeaderboard();
 
   document.getElementById("stakeStatus").innerText =
     `You earned +${reward} pts`;
@@ -132,7 +202,21 @@ document.getElementById("stakeBtn").addEventListener("click", () => {
   addTransaction(`📈 Staked ${stake} pts → +${reward}`);
 });
 
-// ---------------------- COMMENTS ----------------------
+// ---------------- DAILY REWARD ----------------
+document.getElementById("dailyBtn").addEventListener("click", () => {
+  const today = new Date().toDateString();
+  const lastClaim = localStorage.getItem("lastClaim");
+
+  if (lastClaim === today) return alert("Already claimed today");
+
+  points += 10;
+  localStorage.setItem("lastClaim", today);
+
+  updateLeaderboard();
+  addTransaction("🎁 Daily reward +10 pts");
+});
+
+// ---------------- COMMENTS ----------------
 function addComment() {
   const input = document.getElementById("commentInput");
 
@@ -148,7 +232,13 @@ function addComment() {
   input.value = "";
 }
 
-// ---------------------- PAYMENT (UNCHANGED CORE ✅) ----------------------
+// ---------------- PREMIUM STATUS ----------------
+if (localStorage.getItem("isPremium") === "true") {
+  premiumBtn.innerText = "✅ Premium Active";
+  premiumBtn.disabled = true;
+}
+
+// ---------------- PAYMENT (UNCHANGED ✅) ----------------
 premiumBtn.addEventListener("click", () => {
 
   statusBox.innerText = "Processing payment...";
@@ -160,7 +250,6 @@ premiumBtn.addEventListener("click", () => {
       metadata: { type: "premium" }
     },
     {
-      // ✅ MUST RETURN (VERY IMPORTANT)
       onReadyForServerApproval: (paymentId) => {
         return fetch("/.netlify/functions/approve", {
           method: "POST",
@@ -169,7 +258,6 @@ premiumBtn.addEventListener("click", () => {
         });
       },
 
-      // ✅ MUST RETURN (VERY IMPORTANT)
       onReadyForServerCompletion: (paymentId, txid) => {
         return fetch("/.netlify/functions/complete", {
           method: "POST",
@@ -179,8 +267,12 @@ premiumBtn.addEventListener("click", () => {
 
           statusBox.innerText = "✅ Premium Unlocked!";
 
-          addTransaction("💰 Paid 0.5π — Premium");
+          localStorage.setItem("isPremium", "true");
 
+          premiumBtn.innerText = "✅ Premium Active";
+          premiumBtn.disabled = true;
+
+          addTransaction("💰 Paid 0.5π — Premium");
         });
       },
 
@@ -190,7 +282,6 @@ premiumBtn.addEventListener("click", () => {
 
       onError: (err) => {
         statusBox.innerText = "Payment error: " + err;
-        console.error(err);
       }
     }
   );
