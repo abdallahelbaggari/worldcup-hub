@@ -1,18 +1,49 @@
 const axios = require("axios");
 
 exports.handler = async (event) => {
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, body: "Method not allowed" };
+  }
+
   try {
-    const { paymentId, txid } = JSON.parse(event.body);
+    const { paymentId } = JSON.parse(event.body || "{}");
 
-    console.log("Completing payment:", paymentId, txid);
+    if (!paymentId) {
+      return { statusCode: 400, body: "Missing paymentId" };
+    }
 
-    const response = await axios.post(
-      `https://api.minepi.com/v2/payments/${paymentId}/complete`,
-      { txid },
+    const API_KEY = process.env.PI_API_KEY;
+    const YOUR_WALLET = process.env.PI_MAINNET_WALLET;
+
+    const EXPECTED_AMOUNT = 1;
+    const EXPECTED_MEMO = "worldcup_hub_payment_v1";
+
+    // 🔍 Verify payment
+    const verifyRes = await axios.get(
+      `https://api.minepi.com/v2/payments/${paymentId}`,
       {
-        headers: {
-          Authorization: `Key ${process.env.PI_API_KEY}`
-        }
+        headers: { Authorization: `Key ${API_KEY}` }
+      }
+    );
+
+    const payment = verifyRes.data;
+
+    // ✅ Strict validation (VERY IMPORTANT)
+    if (
+      payment.status !== "CREATED" ||
+      payment.amount !== EXPECTED_AMOUNT ||
+      payment.to_address !== YOUR_WALLET ||
+      payment.memo !== EXPECTED_MEMO
+    ) {
+      return { statusCode: 400, body: "Validation failed" };
+    }
+
+    // ✅ Approve payment
+    const response = await axios.post(
+      `https://api.minepi.com/v2/payments/${paymentId}/approve`,
+      {},
+      {
+        headers: { Authorization: `Key ${API_KEY}` }
       }
     );
 
@@ -22,11 +53,11 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
-    console.error("Complete error:", error.response?.data || error.message);
+    console.error("Approve error:", error.response?.data || error.message);
 
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Completion failed" })
+      body: JSON.stringify({ error: "Approval failed" })
     };
   }
 };
