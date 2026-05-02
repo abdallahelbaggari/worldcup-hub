@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#050A0E">
-<meta name="description" content="WorldCup Hub — The ultimate football fan app on Pi Network">
-<title>WorldCup Hub · Pi Network</title>
+<meta name="description" content="WorldCup — The ultimate football fan app on Pi Network">
+<title>WorldCup · Pi Network</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -232,7 +232,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <!-- LOGIN -->
 <div id="ls">
   <div class="lb">⚽</div>
-  <div class="lt">WorldCup Hub</div>
+  <div class="lt">WorldCup</div>
   <div class="ls2">Pi Network · The Football Fan App</div>
   <div class="lf-wrap">
     <span class="lf">📅 Real Fixtures</span>
@@ -252,7 +252,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <div class="ttrack" id="tt">
     <span class="ti">⚽ The biggest football tournament · USA · Canada · Mexico</span>
     <span class="ti">🏆 48 Teams · 12 Groups · 104 Matches</span>
-    <span class="ti">🌍 WorldCup Hub — Pi Network Fan App · worldcup.pi</span>
+    <span class="ti">🌍 WorldCup — Pi Network Fan App · worldcup.pi</span>
     <span class="ti">⚽ Predict · Earn points · Top the leaderboard</span>
   </div>
 </div>
@@ -260,7 +260,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <!-- HEADER -->
 <header id="ah" style="display:none">
   <div class="hi">
-    <div class="hlogo">⚽ WorldCup Hub</div>
+    <div class="hlogo">⚽ WorldCup</div>
     <div class="hr">
       <div class="uchip" id="uc">Pioneer</div>
       <select class="lpick" id="lp" onchange="applyLang(this.value)">
@@ -321,7 +321,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <div class="ibox">🧠 Predict match outcomes · +5 pts per prediction · +10 pts if correct</div>
     <div class="sh">🧠 Pick Your Winner</div>
     <div id="pc"><div class="loader"><div class="spin"></div>Loading matches...</div></div>
-    <div class="ad" id="ad">⚽ WorldCup Hub — Pi Network Football Community</div>
+    <div class="ad" id="ad">⚽ WorldCup — Pi Network Football Community</div>
   </div>
 
   <!-- STANDINGS -->
@@ -610,7 +610,7 @@ function updTicker(){
   var today=new Date().toISOString().split('T')[0];
   var tm=matches.filter(function(m){return m.date===today;});
   var el=document.getElementById('tt');if(!el)return;
-  var items=['<span class="ti">⚽ The biggest football tournament · USA · Canada · Mexico</span>','<span class="ti">🌍 WorldCup Hub — Pi Network · worldcup.pi</span>'];
+  var items=['<span class="ti">⚽ The biggest football tournament · USA · Canada · Mexico</span>','<span class="ti">🌍 WorldCup — Pi Network · worldcup.pi</span>'];
   tm.forEach(function(m){
     var hs=m.score&&m.score.ft;
     if(hs){items.push('<span class="ti">FT: '+fl(m.team1)+' '+m.team1+' <span class="tscore">'+m.score.ft[0]+'-'+m.score.ft[1]+'</span> '+m.team2+' '+fl(m.team2)+'</span>');}
@@ -752,7 +752,7 @@ function buyPrem(){
     // MAINNET PAYMENT — sandbox:false
     Pi.createPayment({
       amount:0.5,
-      memo:'WorldCup Hub Premium',
+      memo:'WorldCup Premium',
       metadata:{type:'premium',app:'worldcup.pi',v:'6.0',net:'mainnet'}
     },{
       onReadyForServerApproval:function(pid){
@@ -924,7 +924,7 @@ function renderTrH(){
 }
 
 // ── ADS ────────────────────────────────
-var ADS=['⚽ WorldCup Hub — Pi Network Football Community · worldcup.pi','🚀 Mine Pi daily · pi.app','🏆 Build on Pi Network · develop.pi','🌍 70M Pioneers worldwide · Join Pi Network','💰 Pi Network — The future of digital currency'];
+var ADS=['⚽ WorldCup — Pi Network Football Community · worldcup.pi','🚀 Mine Pi daily · pi.app','🏆 Build on Pi Network · develop.pi','🌍 70M Pioneers worldwide · Join Pi Network','💰 Pi Network — The future of digital currency'];
 var ai=0;
 function cycleAd(){
   var el=document.getElementById('ad');if(!el)return;
