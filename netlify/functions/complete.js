@@ -6,10 +6,10 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { paymentId } = JSON.parse(event.body || "{}");
+    const { paymentId, txid } = JSON.parse(event.body || "{}");
 
-    if (!paymentId) {
-      return { statusCode: 400, body: "Missing paymentId" };
+    if (!paymentId || !txid) {
+      return { statusCode: 400, body: "Missing paymentId or txid" };
     }
 
     const API_KEY = process.env.PI_API_KEY;
@@ -18,7 +18,7 @@ exports.handler = async (event) => {
     const EXPECTED_AMOUNT = 1;
     const EXPECTED_MEMO = "worldcup_hub_payment_v1";
 
-    // 🔍 Verify payment
+    // 🔍 Verify payment again (CRITICAL)
     const verifyRes = await axios.get(
       `https://api.minepi.com/v2/payments/${paymentId}`,
       {
@@ -28,22 +28,27 @@ exports.handler = async (event) => {
 
     const payment = verifyRes.data;
 
-    // ✅ Strict validation (VERY IMPORTANT)
+    // 🔒 Strong validation
     if (
-      payment.status !== "CREATED" ||
+      payment.status !== "APPROVED" ||
       payment.amount !== EXPECTED_AMOUNT ||
       payment.to_address !== YOUR_WALLET ||
-      payment.memo !== EXPECTED_MEMO
+      payment.memo !== EXPECTED_MEMO ||
+      !payment.transaction ||
+      payment.transaction.txid !== txid
     ) {
-      return { statusCode: 400, body: "Validation failed" };
+      return { statusCode: 400, body: "Verification failed" };
     }
 
-    // ✅ Approve payment
+    // ✅ Complete payment
     const response = await axios.post(
-      `https://api.minepi.com/v2/payments/${paymentId}/approve`,
-      {},
+      `https://api.minepi.com/v2/payments/${paymentId}/complete`,
+      { txid },
       {
-        headers: { Authorization: `Key ${API_KEY}` }
+        headers: {
+          Authorization: `Key ${API_KEY}`,
+          "Content-Type": "application/json"
+        }
       }
     );
 
@@ -53,11 +58,11 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
-    console.error("Approve error:", error.response?.data || error.message);
+    console.error("Complete error:", error.response?.data || error.message);
 
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Approval failed" })
+      body: JSON.stringify({ error: "Completion failed" })
     };
   }
 };
